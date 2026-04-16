@@ -1,6 +1,9 @@
 # Infra-Mind 
 ## Kubernetes | Claude AI | ArgoCD | HashiCorp Vault | External Secrets Operator 
 
+> **Note:** This project is currently running on a local Kubernetes cluster for development and testing purposes.
+
+
 ---
 
 ## Table of Contents
@@ -13,7 +16,7 @@
 7. [GitOps Flow with ArgoCD](#7-gitops-flow-with-argocd)
 8. [Repository Structure](#8-repository-structure)
 9. [Setup and Installation](#9-setup-and-installation)
-10. [Security Notes](#11-security-notes)
+10.[Security Notes](#11-security-notes)
 
 ---
 
