@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: infra-mind
+  namespace: default
+  labels:
+    app: infra-mind
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: infra-mind
+  template:
+    metadata:
+      labels:
+        app: infra-mind
+    spec:
+      serviceAccountName: infra-mind-sa
+      containers:
+      - name: infra-mind
+        image: infra-mind:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        env:
+        - name: ANTHROPIC_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: anthropic-secret
+              key: ANTHROPIC_API_KEY
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
