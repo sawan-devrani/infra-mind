@@ -18,7 +18,7 @@ spec:
       serviceAccountName: infra-mind-sa
       containers:
       - name: infra-mind
-        image: infra-mind:latest
+        image: infra-mind:v1.0.1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
