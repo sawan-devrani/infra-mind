@@ -16,9 +16,11 @@ spec:
         app: infra-mind
     spec:
       serviceAccountName: infra-mind-sa
+      imagePullSecrets:
+      - name: dockerhub-pull-secret
       containers:
       - name: infra-mind
-        image: infra-mind:v1.0.1
+        image: sawandevrani/infra-mind:v1.0.1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
