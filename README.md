@@ -1,8 +1,9 @@
 # Infra-Mind 
 ## Kubernetes | Claude AI | ArgoCD | HashiCorp Vault | External Secrets Operator 
 
-> **Note:** This project is currently running on a local Kubernetes cluster for development and testing purposes.
+> **Note:** This project is currently running on a local Kubernetes cluster for development and testing purposes — powered by Claude AI under the hood.
 
+> *"Tired of reading kubectl logs at 2am. Built something to do it for me instead."*
 
 ---
 
