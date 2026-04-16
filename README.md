@@ -17,7 +17,7 @@
 7. [GitOps Flow with ArgoCD](#7-gitops-flow-with-argocd)
 8. [Repository Structure](#8-repository-structure)
 9. [Setup and Installation](#9-setup-and-installation)
-10.[Security Notes](#11-security-notes)
+10. [Security Notes](#11-security-notes)
 
 ---
 
@@ -311,9 +311,11 @@ To change anything: edit file, commit, push. Never kubectl apply directly.
 
 ### Step 1: Deploy Vault
 
-
+```
 helm repo add hashicorp https://helm.releases.hashicorp.com
+
 helm repo update
+
 kubectl create namespace vault
 
 helm install vault hashicorp/vault \
@@ -322,8 +324,10 @@ helm install vault hashicorp/vault \
   --set "server.standalone.enabled=true" \
   --set "server.dataStorage.storageClass=hostpath" \
   --set "injector.enabled=false"
+```
 
 ### Step 2: Initialise and Unseal Vault
+```
 kubectl exec -n vault -it vault-0 -- vault operator init \
   -key-shares=3 \
   -key-threshold=2 \
@@ -331,9 +335,11 @@ kubectl exec -n vault -it vault-0 -- vault operator init \
 
 kubectl exec -n vault vault-0 -- vault operator unseal KEY_1
 kubectl exec -n vault vault-0 -- vault operator unseal KEY_2
+```
 
 ### Step 3: Store Your API Key in Vault
 
+```
 vault policy write infra-mind-policy - <<EOF
 path "secret/data/infra-mind" {
   capabilities = ["read"]
@@ -348,9 +354,10 @@ ESO_TOKEN=$(vault token create \
 kubectl create secret generic vault-eso-token \
   --namespace default \
   --from-literal=token=$ESO_TOKEN
+```
 
 ### Step 5: Install External Secrets Operator
-
+```
 helm repo add external-secrets https://charts.external-secrets.io
 helm repo update
 
@@ -359,48 +366,54 @@ helm install external-secrets \
   --namespace external-secrets \
   --create-namespace \
   --set installCRDs=true
-
+```
 ### Step 6: Create Docker Hub Pull Secret
-
+```
 kubectl create secret docker-registry dockerhub-pull-secret \
   --docker-server=https://index.docker.io/v1/ \
   --docker-username=YOUR_USERNAME \
   --docker-password=YOUR_ACCESS_TOKEN \
   --docker-email=YOUR_EMAIL
-
+```
 ### Step 7: Build and Push the Docker Image
-
+```
 docker build -t YOUR_USERNAME/infra-mind:v1.0.1 .
 docker push YOUR_USERNAME/infra-mind:v1.0.1
-
+```
 ### Step 8: Deploy via ArgoCD
-
+```
 kubectl apply -f argocd-app.yaml
-
+```
 ### Step 9: Access the App
-
+```
 kubectl port-forward svc/infra-mind-svc 9090:80
-
+```
 ### step 10: Health Check
-
+```
 Health Check : curl http://localhost:9090/health
 
 Response: {"status": "ok"}
-
+```
 
 ### Step 11. Verification Checks
 
-# ESO successfully synced from Vault
+#### ESO successfully synced from Vault
+```
 kubectl get externalsecret anthropic-secret
-# READY column should show: True
+```
+###### READY column should show: True
 
-# ArgoCD app is healthy
+#### ArgoCD app is healthy
+```
 kubectl get application infra-mind -n argocd
-# SYNC STATUS: Synced  HEALTH STATUS: Healthy
+```
+###### SYNC STATUS: Synced  HEALTH STATUS: Healthy
 
-# Pod is running
+#### Pod is running
+```
 kubectl get pods -l app=infra-mind
-# STATUS: Running 1/1
+```
+###### STATUS: Running 1/1
 
 ## 10. Security Notes
 	•	Vault initialised with 3 key shares, threshold of 2 (Shamir’s Secret Sharing)
