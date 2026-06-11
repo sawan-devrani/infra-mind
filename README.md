@@ -189,6 +189,24 @@ or updates a native Kubernetes Secret object automatically.
         v
     infra-mind pod
 
+ **Note:**
+
+Vault no longer uses a manually created ESO token. Instead, External Secrets Operator authenticates to Vault using Kubernetes auth and a dedicated service account.
+
+Create the Vault policy:
+
+```bash
+vault policy write infra-mind-policy - <<EOF
+path "secret/data/infra-mind" {
+  capabilities = ["read"]
+}
+
+path "secret/metadata/infra-mind" {
+  capabilities = ["read", "list"]
+}
+EOF
+
+
 ### Step 4: infra-mind Pod Reads the Secret and Calls Claude
 
 The Flask app reads ANTHROPIC_API_KEY from the environment.
@@ -211,7 +229,7 @@ When /summarize is called:
     Vault KV v2 engine: secret/infra-mind
       | ANTHROPIC_API_KEY = sk-ant-...
       |
-      | ESO polls every 1h using scoped read-only token
+      | ESO polls every 1h using Kubernetes service account auth
       | Token policy: read only on secret/data/infra-mind
       v
     Kubernetes Secret: anthropic-secret
@@ -224,7 +242,7 @@ When /summarize is called:
     Anthropic Claude API
 
 The application never interacts with Vault directly.
-The scoped ESO token cannot read any other secret path.
+The scoped ESO Kubernetes service account cannot read any other secret path.
 Each layer has access to only exactly what it needs.
 
 ---
@@ -354,6 +372,44 @@ ESO_TOKEN=$(vault token create \
 kubectl create secret generic vault-eso-token \
   --namespace default \
   --from-literal=token=$ESO_TOKEN
+```
+
+### Step 4: Enable and configure Kubernetes auth
+
+```
+kubectl -n vault exec -it vault-0 -- sh
+
+vault policy write infra-mind-policy - <<EOF
+path "secret/data/infra-mind" {
+  capabilities = ["read"]
+}
+
+path "secret/metadata/infra-mind" {
+  capabilities = ["read", "list"]
+}
+EOF
+
+Enable and configure Kubernetes auth:
+
+vault auth enable kubernetes
+
+vault write auth/kubernetes/config \
+  kubernetes_host="https://kubernetes.default.svc" \
+  kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+  token_reviewer_jwt="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)"
+
+Create the Kubernetes auth role:
+
+vault write auth/kubernetes/role/infra-mind-role \
+  bound_service_account_names="infra-mind-vault-sa" \
+  bound_service_account_namespaces="infra-mind" \
+  policies="infra-mind-policy" \
+  ttl="1h"
+
+The application runtime uses `infra-mind-sa` in the `infra-mind` namespace.
+
+The Vault authentication path uses a separate service account:`infra-mind-vault-sa` for External Secrets Operator and Vault access.
+
 ```
 
 ### Step 5: Install External Secrets Operator
