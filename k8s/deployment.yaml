@@ -6,7 +6,12 @@ metadata:
   labels:
     app: infra-mind
 spec:
-  replicas: 1
+  replicas: 3
+  stragegy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: infra-mind
