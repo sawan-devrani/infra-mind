@@ -2,7 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: infra-mind-svc
-  namespace: infra-mind
+  # namespace: infra-mind
+  namespace: default
 spec:
   selector:
     app: infra-mind
