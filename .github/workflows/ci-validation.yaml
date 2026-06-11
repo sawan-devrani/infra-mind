@@ -45,7 +45,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: detect --source . --redact --verbose --exit-code 1
-  trivy-fs:
+  sca:
     name: SCA and Config Scan - Trivy Filesystem
     runs-on: ubuntu-latest
     needs: gitleaks
