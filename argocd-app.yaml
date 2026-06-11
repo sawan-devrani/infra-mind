@@ -13,8 +13,7 @@ spec:
     path: k8s
   destination:
     server: https://kubernetes.default.svc
-    # namespace: infra-mind
-    namespace: default
+    namespace: infra-mind
   syncPolicy:
     automated:
       prune: true

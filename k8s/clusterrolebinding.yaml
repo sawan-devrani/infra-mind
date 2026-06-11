@@ -9,5 +9,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: infra-mind-sa
-  # namespace: infra-mind
-  namespace: default
+  namespace: infra-mind
