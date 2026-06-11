@@ -13,8 +13,7 @@ spec:
     path: k8s
   destination:
     server: https://kubernetes.default.svc
-    namespace: infra-mind-app
-  syncPolicy:
+    namespace: infra-mind
     automated:
       prune: true        
       selfHeal: true
