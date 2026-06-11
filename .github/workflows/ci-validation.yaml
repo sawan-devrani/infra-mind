@@ -1,17 +1,17 @@
 name: Infra-Mind DevSecOps Pipeline
 
-on:
-  # push:
-  #   branches: [main]
-  pull_request:
-    branches: [main]
-
 # on:
-#   push:
-#     branches:
-#       - '**'          # Matches every single branch
-#       - '!main'       # Excludes the main branch
-#       - '!master'     # Excludes the master branch
+#   # push:
+#   #   branches: [main]
+#   pull_request:
+#     branches: [main]
+
+on:
+  push:
+    branches:
+      - '**'          # Matches every single branch
+      - '!main'       # Excludes the main branch
+      - '!master'     # Excludes the master branch
 
 # permissions:
 #   contents: write
@@ -45,29 +45,67 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: detect --source . --redact --verbose --exit-code 1
-
-  sca:
-    name: SCA - Python Dependencies
+  trivy-fs:
+    name: SCA and Config Scan - Trivy Filesystem
     runs-on: ubuntu-latest
     needs: gitleaks
+
     steps:
       - name: Checkout code
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          scan-type: fs
+          scan-ref: .
+          format: table
+          exit-code: 1
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          scanners: vuln,secret,misconfig
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f app/requirements.txt ]; then pip install -r app/requirements.txt; fi
-          pip install safety
+      - name: Generate Trivy SARIF report
+        if: always()
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-fs-results.sarif
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          scanners: vuln,secret,misconfig
 
-      - name: Run Safety scan
-        run: safety check --full-report
+      - name: Upload Trivy SARIF to GitHub Security
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-fs-results.sarif
+  # sca:
+  #   name: SCA - Python Dependencies
+  #   runs-on: ubuntu-latest
+  #   needs: gitleaks
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: ${{ env.PYTHON_VERSION }}
+
+  #     - name: Install dependencies
+  #       run: |
+  #         python -m pip install --upgrade pip
+  #         if [ -f app/requirements.txt ]; then pip install -r app/requirements.txt; fi
+  #         pip install safety
+
+  #     - name: Run Safety scan
+  #       run: safety check --full-report
+
+
+  
   semgrep:
     name: SAST - Semgrep
     runs-on: ubuntu-latest
