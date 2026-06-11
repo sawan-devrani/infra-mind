@@ -195,7 +195,7 @@ Vault no longer uses a manually created ESO token. Instead, External Secrets Ope
 
 Create the Vault policy:
 
-```bash
+```
 vault policy write infra-mind-policy - <<EOF
 path "secret/data/infra-mind" {
   capabilities = ["read"]
@@ -205,7 +205,7 @@ path "secret/metadata/infra-mind" {
   capabilities = ["read", "list"]
 }
 EOF
-
+```
 
 ### Step 4: infra-mind Pod Reads the Secret and Calls Claude
 
