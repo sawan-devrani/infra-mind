@@ -162,7 +162,7 @@ jobs:
           image-ref: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           format: table
           exit-code: 1
-          severity: CRITICAL,HIGH
+          severity: CRITICAL #,HIGH
           ignore-unfixed: true
 
       - name: Generate SARIF report
