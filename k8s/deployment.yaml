@@ -24,7 +24,7 @@ spec:
       - name: dockerhub-pull-secret
       containers:
       - name: infra-mind
-        image: sawandevrani/infra-mind:855468247b26f7001ac078d2adef6f9cac354537
+        image: sawandevrani/infra-mind:da6ceaefeb1f5242a8dedd754ee7acb3d7755974
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
