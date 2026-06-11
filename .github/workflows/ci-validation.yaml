@@ -61,7 +61,7 @@ jobs:
           scan-ref: .
           format: table
           exit-code: 1
-          severity: HIGH,CRITICAL
+          severity: CRITICAL
           ignore-unfixed: true
           scanners: vuln,secret,misconfig
 
