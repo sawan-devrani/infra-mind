@@ -14,11 +14,12 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: infra-mind
+  syncPolicy:
     automated:
-      prune: true        
+      prune: true
       selfHeal: true
       allowEmpty: false
     syncOptions:
       - CreateNamespace=true
       - ApplyOutOfSyncOnly=true
-      - ServerSideApply=true 
+      - ServerSideApply=true
