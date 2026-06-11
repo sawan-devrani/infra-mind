@@ -3,18 +3,22 @@ kind: Application
 metadata:
   name: infra-mind
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
     repoURL: https://github.com/sawan-devrani/infra-mind.git
-    targetRevision: HEAD
+    targetRevision: main 
     path: k8s
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
-  syncPolicy:
+    namespace: infra-mind
     automated:
-      prune: false
+      prune: true        
       selfHeal: true
+      allowEmpty: false
     syncOptions:
-    - CreateNamespace=true
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - ServerSideApply=true 
